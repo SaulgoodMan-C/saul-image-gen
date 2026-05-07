@@ -55,7 +55,7 @@ POST {IMAGE_API_URL}/images/edits
 
 `IMAGE_API_URL` 可以带或不带结尾斜杠，脚本会自动处理。
 
-如果接口返回 `Image generation is not enabled for this group`，说明请求已经到达供应商，但当前 key 或分组没有开启生图权限。请换成服务商提供的图片接口 base URL，或让服务商给该 key/group 开启 image generation；这不是 Codex skill 安装问题。
+如果接口返回 `Image generation is not enabled for this group`，说明请求已经到达供应商，但当前 `IMAGE_API_KEY` 对应的渠道/权限组没有开启生图权限。同一个 URL 下，不同 key 也可能有不同权限；请让服务商给该 key/channel 开启 image generation，或换一个已开通生图的 key。
 
 ## 参考图模式
 

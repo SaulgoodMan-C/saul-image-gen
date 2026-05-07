@@ -70,7 +70,7 @@ IMAGE_API_URL=https://api.tu-zi.com/v1
 IMAGE_MODEL=gpt-image-2
 ```
 
-`IMAGE_API_URL` 必须是已开通图片生成的接口 base URL / 分组。如果你的服务商把聊天、代码、图片分到不同分组，请填写图片分组；直接沿用 Codex 主模型的 coding/chat 地址可能会返回 `Image generation is not enabled for this group`。
+`IMAGE_API_KEY` 必须绑定了图片生成权限。同一个 `IMAGE_API_URL` 下，不同 key 也可能对应不同渠道/权限；如果 key 只开了聊天或代码能力，会返回 `Image generation is not enabled for this group`。
 
 ### 3. 测试生成图片
 
@@ -195,7 +195,7 @@ npx -y tsx ~/.codex/skills/saul-skills/saul-image-gen/scripts/main.ts \
 | 提示输出文件已存在 | 换一个 `--image` 路径；不传 `--image` 时脚本会自动命名 |
 | 参考图找不到 | 检查 `--ref` 后面的路径是否真实存在 |
 | 不知道 URL 怎么填 | 先用服务商示例 URL；中转接口则改成中转地址 |
-| `Image generation is not enabled for this group` | 不是安装问题；当前 API key 或分组没开生图权限。换成服务商提供的图片接口分组，例如 `https://api.tu-zi.com/v1`，或让服务商给这个 key/group 开启 image generation |
+| `Image generation is not enabled for this group` | 不是安装问题；当前 API key 对应的渠道/权限组没开生图。确认这个 key 已开通 image generation，或让服务商换一个有生图权限的 key/channel |
 | API 报错 | 保留错误文本；如果有 `request_id`，反馈问题时一起提供 |
 
 反馈给服务商时，注意提供脱敏后的调用时间、接口名、请求体和响应体。

@@ -362,8 +362,8 @@ describe("saul-skills script", () => {
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain("Responses image generation request failed with status 403");
-      expect(result.stderr).toContain("current API key or group has not enabled image generation");
-      expect(result.stderr).toContain("IMAGE_API_URL=https://api.tu-zi.com/v1");
+      expect(result.stderr).toContain("current API key's channel/group has not enabled image generation");
+      expect(result.stderr).toContain("The URL can be correct");
     } finally {
       await server.close();
     }

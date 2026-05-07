@@ -123,8 +123,8 @@ function buildApiErrorMessage(label: string, status: number, responseText: strin
   if (status === 403 && normalized.includes("image generation is not enabled for this group")) {
     return [
       message,
-      "This means the request reached the provider, but the current API key or group has not enabled image generation.",
-      "Use an image-enabled API base URL/group, for example IMAGE_API_URL=https://api.tu-zi.com/v1, or ask the provider to enable image generation for this key/group.",
+      "This means the request reached the provider, but the current API key's channel/group has not enabled image generation.",
+      "The URL can be correct; ask the provider to enable image generation for this key/channel, or use a key that already has image generation enabled.",
     ].join("\n");
   }
   return message;
