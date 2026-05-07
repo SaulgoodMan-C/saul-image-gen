@@ -8,7 +8,9 @@
 
 ## 快速开始
 
-1. 安装到 Codex skills 目录：
+### 1. 安装到 Codex skills 目录
+
+macOS / Linux:
 
 ```bash
 mkdir -p ~/.codex/skills/saul-skills
@@ -16,26 +18,73 @@ git clone https://github.com/SaulgoodMan-C/saul-image-gen.git \
   ~/.codex/skills/saul-skills/saul-image-gen
 ```
 
-2. 配置：
+Windows PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.codex\skills\saul-skills" | Out-Null
+git clone https://github.com/SaulgoodMan-C/saul-image-gen.git "$HOME\.codex\skills\saul-skills\saul-image-gen"
+```
+
+如果目录已经存在，用 `git pull` 更新。
+
+macOS / Linux:
+
+```bash
+cd ~/.codex/skills/saul-skills/saul-image-gen
+git pull
+```
+
+Windows PowerShell:
+
+```powershell
+Set-Location "$HOME\.codex\skills\saul-skills\saul-image-gen"
+git pull
+```
+
+### 2. 复制并编辑配置
 
 ```text
 ~/.codex/skills/saul-skills/saul-image-gen/.env
 ```
 
-可以从示例文件开始：
+macOS / Linux:
 
 ```bash
 cd ~/.codex/skills/saul-skills/saul-image-gen
 cp .env.example .env
 ```
 
-然后编辑 `.env`，填自己的 `IMAGE_API_KEY`、`IMAGE_API_URL` 和 `IMAGE_MODEL`。
+Windows PowerShell:
 
-3. 生成图片：
+```powershell
+Set-Location "$HOME\.codex\skills\saul-skills\saul-image-gen"
+Copy-Item .env.example .env
+notepad .env
+```
+
+在 `.env` 里填这三项：
+
+```dotenv
+IMAGE_API_KEY=你的_key
+IMAGE_API_URL=https://api.tu-zi.com/v1
+IMAGE_MODEL=gpt-image-2
+```
+
+`IMAGE_API_URL` 必须是已开通图片生成的接口 base URL / 分组。如果你的服务商把聊天、代码、图片分到不同分组，请填写图片分组；直接沿用 Codex 主模型的 coding/chat 地址可能会返回 `Image generation is not enabled for this group`。
+
+### 3. 测试生成图片
+
+macOS / Linux:
 
 ```bash
 npx -y tsx ~/.codex/skills/saul-skills/saul-image-gen/scripts/main.ts \
   --prompt "一只戴墨镜的柴犬，赛博朋克风格"
+```
+
+Windows PowerShell:
+
+```powershell
+npx -y tsx "$HOME\.codex\skills\saul-skills\saul-image-gen\scripts\main.ts" --prompt "一只戴墨镜的柴犬，赛博朋克风格"
 ```
 
 生成成功后，图片会保存到 `DEFAULT_OUTPUT_DIR` 配置的目录，并自动生成文件名；默认目录是 `~/Desktop/images`。
@@ -54,7 +103,7 @@ npx -y tsx ~/.codex/skills/saul-skills/saul-image-gen/scripts/main.ts \
 [image-api]
 # 支持：Tuzi、OpenAI 官方图片接口、OpenAI-compatible 中转、兼容 /images/generations 或 /responses 的图片供应商。
 IMAGE_API_KEY=你的_key
-IMAGE_API_URL=https://api.tu-zi.com/coding
+IMAGE_API_URL=https://api.tu-zi.com/v1
 IMAGE_MODEL=gpt-image-2
 IMAGE_WIRE_API=responses
 IMAGE_REF_MODE=generations-json
@@ -146,6 +195,7 @@ npx -y tsx ~/.codex/skills/saul-skills/saul-image-gen/scripts/main.ts \
 | 提示输出文件已存在 | 换一个 `--image` 路径；不传 `--image` 时脚本会自动命名 |
 | 参考图找不到 | 检查 `--ref` 后面的路径是否真实存在 |
 | 不知道 URL 怎么填 | 先用服务商示例 URL；中转接口则改成中转地址 |
+| `Image generation is not enabled for this group` | 不是安装问题；当前 API key 或分组没开生图权限。换成服务商提供的图片接口分组，例如 `https://api.tu-zi.com/v1`，或让服务商给这个 key/group 开启 image generation |
 | API 报错 | 保留错误文本；如果有 `request_id`，反馈问题时一起提供 |
 
 反馈给服务商时，注意提供脱敏后的调用时间、接口名、请求体和响应体。

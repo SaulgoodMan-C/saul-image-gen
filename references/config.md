@@ -39,7 +39,7 @@ DEFAULT_OUTPUT_DIR=~/Desktop/images
 [image-api]
 # 支持：Tuzi、OpenAI 官方图片接口、OpenAI-compatible 中转、兼容 /images/generations 或 /responses 的图片供应商。
 IMAGE_API_KEY=你的_key
-IMAGE_API_URL=https://api.tu-zi.com/coding
+IMAGE_API_URL=https://api.tu-zi.com/v1
 IMAGE_MODEL=gpt-image-2
 IMAGE_WIRE_API=responses
 IMAGE_REF_MODE=generations-json
@@ -54,6 +54,8 @@ POST {IMAGE_API_URL}/images/edits
 ```
 
 `IMAGE_API_URL` 可以带或不带结尾斜杠，脚本会自动处理。
+
+如果接口返回 `Image generation is not enabled for this group`，说明请求已经到达供应商，但当前 key 或分组没有开启生图权限。请换成服务商提供的图片接口 base URL，或让服务商给该 key/group 开启 image generation；这不是 Codex skill 安装问题。
 
 ## 参考图模式
 

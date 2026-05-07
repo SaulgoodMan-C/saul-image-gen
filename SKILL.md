@@ -92,6 +92,7 @@ npx -y tsx ~/.codex/skills/saul-skills/saul-image-gen/scripts/main.ts \
 | 提示文件已存在 | 换一个 `--image` 路径；不传 `--image` 时脚本会自动命名 |
 | 提示参考图不存在 | 检查 `--ref` 路径 |
 | 提示参数不支持 | 换模型，或去掉 `--quality` / 调整 `--ar` |
+| 提示 `Image generation is not enabled for this group` | 请求到达了接口，但当前 API key/group 没开生图权限；让用户换图片接口分组或联系供应商开启 image generation |
 | API 报错 | 保留错误文本，通常和 key、余额、模型或接口地址有关 |
 
 ## 测试

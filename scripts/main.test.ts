@@ -334,6 +334,41 @@ describe("saul-skills script", () => {
     }
   });
 
+  test("explains image-generation-disabled group errors", async () => {
+    const server = await startServer(async (request, response) => {
+      await readJsonBody(request);
+      response.statusCode = 403;
+      response.setHeader("Content-Type", "application/json");
+      response.end(JSON.stringify({
+        error: {
+          message: "Image generation is not enabled for this group",
+          type: "permission_error",
+        },
+      }));
+    });
+
+    try {
+      const result = await runSkill({
+        env: {
+          IMAGE_API_KEY: "image-test-key",
+          IMAGE_API_URL: `${server.origin}/coding`,
+          IMAGE_WIRE_API: "responses",
+          IMAGE_MODEL: "gpt-image-2",
+          DEFAULT_QUALITY: "",
+          DEFAULT_ASPECT_RATIO: "",
+        },
+        cliArgs: [],
+      });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain("Responses image generation request failed with status 403");
+      expect(result.stderr).toContain("current API key or group has not enabled image generation");
+      expect(result.stderr).toContain("IMAGE_API_URL=https://api.tu-zi.com/v1");
+    } finally {
+      await server.close();
+    }
+  });
+
   test("public-facing files do not contain real-looking API keys", async () => {
     const publicFiles = [
       ".env.example",
@@ -551,6 +586,45 @@ describe("saul-skills script", () => {
       const expectedDir = path.join(result.homeDir, "Desktop", "images");
       expect(savedPath.startsWith(`${expectedDir}${path.sep}`)).toBe(true);
       expect(path.basename(savedPath)).toMatch(/^image-\d{8}-\d{6}-\d+\.png$/);
+      const savedBytes = await readFile(savedPath);
+      expect(Buffer.compare(savedBytes, PNG_BYTES)).toBe(0);
+    } finally {
+      await server.close();
+    }
+  });
+
+  test("uses USERPROFILE when HOME is unavailable", async () => {
+    const server = await startServer(async (request, response) => {
+      response.setHeader("Content-Type", "application/json");
+      response.end(JSON.stringify({ data: [{ b64_json: PNG_BYTES.toString("base64") }] }));
+    });
+
+    try {
+      const tempRoot = await createTempRoot();
+      const result = await runSkill({
+        env: {
+          HOME: "",
+          USERPROFILE: tempRoot,
+          IMAGE_API_KEY: "image-test-key",
+          IMAGE_API_URL: `${server.origin}/v1`,
+          IMAGE_MODEL: "",
+          OPENAI_API_KEY: "",
+          OPENAI_IMAGE_MODEL: "",
+          DEFAULT_QUALITY: "",
+          DEFAULT_ASPECT_RATIO: "",
+          DEFAULT_OUTPUT_DIR: "",
+        },
+        cliArgs: [],
+        omitImage: true,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toBe("");
+      const savedLine = result.stdout.split("\n").find((line) => line.startsWith("Saved image: "));
+      expect(savedLine).toBeDefined();
+      const savedPath = savedLine!.replace("Saved image: ", "");
+      const expectedDir = path.join(tempRoot, "Desktop", "images");
+      expect(savedPath.startsWith(`${expectedDir}${path.sep}`)).toBe(true);
       const savedBytes = await readFile(savedPath);
       expect(Buffer.compare(savedBytes, PNG_BYTES)).toBe(0);
     } finally {

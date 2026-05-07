@@ -117,6 +117,19 @@ function fail(message: string): never {
   throw new Error(message);
 }
 
+function buildApiErrorMessage(label: string, status: number, responseText: string): string {
+  const message = `${label} failed with status ${status}${responseText ? `: ${responseText}` : "."}`;
+  const normalized = responseText.toLowerCase();
+  if (status === 403 && normalized.includes("image generation is not enabled for this group")) {
+    return [
+      message,
+      "This means the request reached the provider, but the current API key or group has not enabled image generation.",
+      "Use an image-enabled API base URL/group, for example IMAGE_API_URL=https://api.tu-zi.com/v1, or ask the provider to enable image generation for this key/group.",
+    ].join("\n");
+  }
+  return message;
+}
+
 function parseArgs(argv: string[]): CliArgs {
   const args: CliArgs = {
     prompt: null,
@@ -230,9 +243,15 @@ function ensurePrompt(prompt: string | null): string {
   return prompt.trim();
 }
 
+function getHomeDirectory(): string | null {
+  return process.env.HOME || process.env.USERPROFILE || null;
+}
+
 function expandHomePath(filePath: string): string {
-  if (filePath === "~") return process.env.HOME || filePath;
-  if (filePath.startsWith("~/")) return path.join(process.env.HOME || "~", filePath.slice(2));
+  const homeDirectory = getHomeDirectory();
+  if (filePath === "~") return homeDirectory || filePath;
+  if (filePath.startsWith("~/")) return homeDirectory ? path.join(homeDirectory, filePath.slice(2)) : filePath;
+  if (filePath.startsWith("~\\")) return homeDirectory ? path.join(homeDirectory, filePath.slice(2)) : filePath;
   return filePath;
 }
 
@@ -799,7 +818,7 @@ async function callGenericImageApi(config: ResolvedConfig): Promise<ImageResult>
 
     if (!response.ok) {
       const responseText = (await response.text()).trim();
-      fail(`Image API edit request failed with status ${response.status}${responseText ? `: ${responseText}` : "."}`);
+      fail(buildApiErrorMessage("Image API edit request", response.status, responseText));
     }
 
     const payload = (await response.json()) as GenerationResponse;
@@ -841,7 +860,7 @@ async function callGenericImageApi(config: ResolvedConfig): Promise<ImageResult>
 
   if (!response.ok) {
     const responseText = (await response.text()).trim();
-    fail(`Image API request failed with status ${response.status}${responseText ? `: ${responseText}` : "."}`);
+    fail(buildApiErrorMessage("Image API request", response.status, responseText));
   }
 
   const payload = (await response.json()) as GenerationResponse;
@@ -886,7 +905,7 @@ async function callOpenAICompatibleApi(config: ResolvedConfig): Promise<ImageRes
 
     if (!response.ok) {
       const responseText = (await response.text()).trim();
-      fail(`Image API edit request failed with status ${response.status}${responseText ? `: ${responseText}` : "."}`);
+      fail(buildApiErrorMessage("Image API edit request", response.status, responseText));
     }
 
     const payload = (await response.json()) as GenerationResponse;
@@ -918,7 +937,7 @@ async function callOpenAICompatibleApi(config: ResolvedConfig): Promise<ImageRes
 
   if (!response.ok) {
     const responseText = (await response.text()).trim();
-    fail(`Image API generation request failed with status ${response.status}${responseText ? `: ${responseText}` : "."}`);
+    fail(buildApiErrorMessage("Image API generation request", response.status, responseText));
   }
 
   const payload = (await response.json()) as GenerationResponse;
@@ -980,7 +999,7 @@ async function callResponsesImageApi(config: ResolvedConfig): Promise<ImageResul
 
   if (!response.ok) {
     const responseText = (await response.text()).trim();
-    fail(`Responses image generation request failed with status ${response.status}${responseText ? `: ${responseText}` : "."}`);
+    fail(buildApiErrorMessage("Responses image generation request", response.status, responseText));
   }
 
   const payloadText = await response.text();
