@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, for example v0.1.0"
+        required: true
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: package release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create package
+        run: |
+          mkdir -p dist/saul-image-gen
+          rsync -a ./ dist/saul-image-gen/ \
+            --exclude '.git' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude 'generated' \
+            --exclude 'node_modules' \
+            --exclude 'dist' \
+            --exclude 'coverage' \
+            --exclude '*.log' \
+            --exclude '.DS_Store'
+          cd dist
+          zip -qr saul-image-gen.zip saul-image-gen
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          files: dist/saul-image-gen.zip

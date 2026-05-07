@@ -371,12 +371,14 @@ describe("saul-skills script", () => {
 
   test("public-facing files do not contain real-looking API keys", async () => {
     const publicFiles = [
-      ".env.example",
       "SKILL.md",
       "README.md",
       "references/config.md",
       "references/api.md",
       "agents/openai.yaml",
+      "install/install.sh",
+      "install/install.ps1",
+      ".github/workflows/release.yml",
     ];
     const secretPrefix = ["s", "k"].join("");
     const secretPattern = new RegExp(`\\b${secretPrefix}-[A-Za-z0-9]{16,}\\b`);
@@ -389,11 +391,12 @@ describe("saul-skills script", () => {
 
   test("public-facing config docs do not recommend legacy provider variable names", async () => {
     const publicFiles = [
-      ".env.example",
       "SKILL.md",
       "README.md",
       "references/config.md",
       "agents/openai.yaml",
+      "install/install.sh",
+      "install/install.ps1",
     ];
     const legacyVariablePattern = /\b(?:OPENAI|TUZI)_(?:API_KEY|API_URL|IMAGE_MODEL|GENERATIONS_URL|EDITS_URL)\b/;
 
