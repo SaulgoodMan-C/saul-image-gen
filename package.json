@@ -1,0 +1,9 @@
+{
+  "name": "saul-image-gen",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test scripts/main.test.ts",
+    "check": "bun test scripts/main.test.ts"
+  }
+}
