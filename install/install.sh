@@ -7,6 +7,7 @@ REPO_SLUG="${REPO_OWNER}/${REPO_NAME}"
 DEFAULT_API_URL="https://api.tu-zi.com/v1"
 DEFAULT_MODEL="gpt-image-2"
 INSTALL_DIR="${SAUL_IMAGE_GEN_DIR:-${HOME}/.codex/skills/saul-skills/${REPO_NAME}}"
+INSTALL_TEMP_DIR=""
 
 usage() {
   cat <<'EOF'
@@ -33,6 +34,12 @@ need_command() {
     say "Missing required command: $1"
     say "Install it, then run this script again."
     exit 1
+  fi
+}
+
+cleanup() {
+  if [[ -n "${INSTALL_TEMP_DIR:-}" ]]; then
+    rm -rf "$INSTALL_TEMP_DIR"
   fi
 }
 
@@ -64,14 +71,14 @@ read_value() {
   fi
 
   if [[ "$secret" == "true" ]]; then
-    printf '%s: ' "$label"
+    printf '%s: ' "$label" >/dev/tty
     IFS= read -r -s value </dev/tty
-    printf '\n'
+    printf '\n' >/dev/tty
   elif [[ -n "$default_value" ]]; then
-    printf '%s [%s]: ' "$label" "$default_value"
+    printf '%s [%s]: ' "$label" "$default_value" >/dev/tty
     IFS= read -r value </dev/tty
   else
-    printf '%s: ' "$label"
+    printf '%s: ' "$label" >/dev/tty
     IFS= read -r value </dev/tty
   fi
 
@@ -119,8 +126,9 @@ install_files() {
   need_command unzip
   local temp_dir archive_path extracted_root
   temp_dir="$(mktemp -d)"
+  INSTALL_TEMP_DIR="$temp_dir"
   archive_path="${temp_dir}/${REPO_NAME}.zip"
-  trap 'rm -rf "${temp_dir}"' EXIT
+  trap cleanup EXIT
 
   download_archive "$archive_path"
   unzip -q "$archive_path" -d "$temp_dir"
@@ -137,6 +145,8 @@ install_files() {
 
   rm -rf "$INSTALL_DIR"
   mv "${INSTALL_DIR}.tmp" "$INSTALL_DIR"
+  INSTALL_TEMP_DIR=""
+  rm -rf "$temp_dir"
   say "Installed to ${INSTALL_DIR}"
 }
 
